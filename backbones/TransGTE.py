@@ -6,9 +6,9 @@ import torch.nn.functional as F
 import numpy as np
 from backbones.GCN_Modules import GATNet, GCN, ChebNet
 
-class SpatialGate(nn.Module):
+class ANFG(nn.Module):
     def __init__(self, emb_size):
-        super(SpatialGate, self).__init__()
+        super(ANFG, self).__init__()
         self.linear_gate_sp1 = nn.Linear(emb_size * 2, emb_size)
         self.linear_c_stat = nn.Linear(emb_size, emb_size)
         self.linear_c_sp = nn.Linear(emb_size, emb_size)
@@ -69,7 +69,7 @@ class TransGTE(nn.Module):
         )
 
         self.matrix_adj = torch.tensor(matrix_adjacent, dtype=torch.float, device=device)
-        self.spatialGate_grid = SpatialGate(emb_size=model_dim)
+        self.anfg = ANFG(emb_size=model_dim)
 
         if GCNtype == 'GCN':
             self.__init_GCN(gcn_hid_dim, K)
@@ -147,7 +147,7 @@ class TransGTE(nn.Module):
 
         out_emb_cell = torch.matmul(h1_grid, self.emb_params_grid)
         output_gemb_grid = output_gemb_grid.unsqueeze(1).repeat(1, seq, 1)
-        out_gatedEmb_grid, gate_sp = self.spatialGate_grid(out_emb_cell, output_gemb_grid)
+        out_gatedEmb_grid, gate_sp = self.anfg(out_emb_cell, output_gemb_grid)
         anfg_input = torch.cat([out_emb_cell, output_gemb_grid], dim=-1)
 
         in_enc = out_gatedEmb_grid[:, :-1].transpose(0, 1)
