@@ -5,11 +5,7 @@ import torch.nn as nn
 import torch.nn.init as init
 import torch.nn.functional as F
 
-"""
-    该.py 文件中实现了三种图卷积网络，GCN，ChebNet，GAT。
-    可以直接在train.py中修改模型模型和参数切换三种模型。
 
-"""
 class ChebConv(nn.Module):
     """
     The ChebNet convolution operation.
@@ -171,7 +167,7 @@ class GCN(nn.Module):
         return torch.mm(degree_matrix, graph_data)  # D^(-1) * A = \hat(A)
 
 
-# 图注意力层的定义
+
 class GraphAttentionLayer(nn.Module):
     def __init__(self, in_c, out_c):
         super(GraphAttentionLayer, self).__init__()
@@ -227,7 +223,7 @@ class GATSubNet(nn.Module):
 
 
 
-# GAT 网络的定义
+
 class GATNet(nn.Module):
     def __init__(self, in_c, hid_c, out_c, n_heads):
         super(GATNet, self).__init__()
