@@ -69,10 +69,7 @@ def val(epoch, train_step, train_steps):
                 samples_sum += len(batch_y)
                 pbar.update(1)
     pred_y = torch.cat(pred_y_list, dim=0).to('cpu')
-    # pred_y = torch.tensor(grid_coord_scalar.inverse_transform(np.array(pred_y)))
-
     true_y = torch.cat(true_y_list, dim=0).to('cpu')
-    # true_y = torch.tensor(grid_coord_scalar.inverse_transform(np.array(true_y)))
 
     val_mse = criterion(pred_y, true_y).item()
 
@@ -134,7 +131,8 @@ def model_save(saveName):
     global date, best_model_path
     if os.path.exists(rootpath + date + '_' + model_name) is False:
         os.makedirs(rootpath + date + '_' + model_name)
-    best_model_path = rootpath + date + '_' + model_name + '/' + saveName + '.pkl'
+    # best_model_path = rootpath + date + '_' + model_name + '/' + saveName + '.pkl'
+    best_model_path = rootpath + date + '_' + model_name + '/' + 'best_val_model.pkl'
     torch.save(model.state_dict(), best_model_path)
     return best_model_path
 
@@ -242,11 +240,11 @@ def parse_args(argv=None):
         description='DeepMove Model Train and Test')
     parser.add_argument('--pr', default=0.1, type=float,
                         help='The ratio of the partial sequence in the whole')
-    parser.add_argument('--data', default='porto', type=str,
+    parser.add_argument('--data', default='sanfran', type=str,
                         help='Choose the dataset')
     parser.add_argument('--device', default='cuda:0', type=str,
                         help='Choose device')
-    parser.add_argument('--g', default=50, type=int,
+    parser.add_argument('--g', default=60, type=int,
                         help='Choose grid granularity')
     parser.add_argument('--K', default=2, type=int,
                         help='Choose GCN layers')
@@ -276,14 +274,23 @@ if __name__ == '__main__':
     is_saveModel = True
     batch_size = args.batch_size
     PATIENCE = 10
-    EPOCHES = 300
+    EPOCHES = 250
     patience = 0
     min_val_mse = 99999.0
 
     print('partial ratio:{}'.format(args.pr))
     if args.data == 'porto':
         path1 = 'data/porto/porto_municipality_dataset_r{}.pkl'.format(args.pr)
-        path2 = 'data/porto/grid_coord_center_{}.pkl'.format(args.g)
+        path2 = 'data/porto/grid_coord_center_g{}.pkl'.format(args.g) # g = 50
+    if args.data == 'chengdu':
+        path1 = 'data/chengdu/chengdu_dataset_r{}.pkl'.format(args.pr)
+        path2 = 'data/chengdu/grid_coord_center_g{}.pkl'.format(args.g) # g = 70
+    if args.data == 'shenzhen':
+        path1 = 'data/shenzhen/shenzhen_dataset_r{}.pkl'.format(args.pr)
+        path2 = 'data/shenzhen/grid_coord_center_g{}.pkl'.format(args.g) # g = 70
+    if args.data == 'sanfran':
+        path1 = 'data/sanfran/sanfran_dataset_r{}.pkl'.format(args.pr)
+        path2 = 'data/sanfran/grid_coord_center_g{}.pkl'.format(args.g) # g = 60
 
     with open(path1, 'rb') as fr:
         dataset = pickle.load(fr)
@@ -313,13 +320,6 @@ if __name__ == '__main__':
                      gcn_hid_dim=4, matrix_adjacent=graph_data, g=args.g,
                      n_head=1, K=args.K, GCNtype='GCN', device=device).to(device)
 
-    # params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    # print('params:', params)
-    # params_vector = torch.nn.utils.parameters_to_vector(model.parameters())
-    # params_size = params_vector.numel() * params_vector.element_size()
-    #
-    # model_size_mb = params_size / (1024.0 ** 2)
-    # print(f'Model size: {model_size_mb} MB')
 
     optimizer = torch.optim.Adam(params=model.parameters(), lr=1e-4, eps=1e-9,
                                  betas=(0.9, 0.98))
@@ -342,6 +342,7 @@ if __name__ == '__main__':
     # train_str = f'Training time is {round((time.time() - train_time_start)/3600, 2)} hour'
     train_str = f'Training time is {round((time.time() - train_time_start), 2)} second'
     print(train_str)
+
     record_file.write(train_str + '\n')
     test()
 
