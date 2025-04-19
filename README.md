@@ -13,7 +13,7 @@ The argparse argument pr can be selected from [0.1, 0.3, 0.5, 0.7, 0.9]. The pai
 (porto, 50), (chengdu, 70), (shenzhen, 70), and (sanfran, 60).
 The recommended hyper-parameters in Table 3 of the paper are all initially set in the train.py. 
 
-# Model Evaluation
+## Model Evaluation
 The model parameters will be saved at a new folder in the **modelsave** after training. The trained model can be evaluation by following command:
 ```python
 python eval.py --model_path <a path of model checkpoint>
